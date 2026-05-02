@@ -6,33 +6,26 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
-latest_data = {
-    "temp_bme": 0.0,
-    "humidity": 0.0,
-    "pressure": 0.0,
-    "temp_object": 0.0,
-    "temp_ambient": 0.0,
-    "timestamp": "No data yet"
-}
+latest_data = {"temp_bme":0.0,"humidity":0.0,"pressure":0.0,"temp_object":0.0,"temp_ambient":0.0,"timestamp":"No data yet"}
 
-@app.route("/")
+@app.route('/')
 def index():
-    return open("index.html").read()
+    return "<h1>Drone Dashboard - Working!</h1>"
 
-@app.route("/data", methods=["POST"])
+@app.route('/data', methods=['POST'])
 def receive():
     global latest_data
     d = request.get_json()
     if d:
         latest_data = d
-        latest_data["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"Data: {latest_data}")
+        latest_data['timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         return jsonify({"status":"ok"}), 200
     return jsonify({"status":"error"}), 400
 
-@app.route("/api/data")
+@app.route('/api/data')
 def send():
     return jsonify(latest_data)
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
