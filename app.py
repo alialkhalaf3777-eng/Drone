@@ -92,7 +92,7 @@ HTML = """<!DOCTYPE html>
 <div class="card"><div class="card-title"><div class="title-l"><div class="title-bar"></div>Interactive Panel Map</div><span style="font-size:9.5px;color:#94a3b8">A-001 = <span style="color:#16a34a;font-weight:700">LIVE</span></span></div><div class="pmap" id="pmap"></div><div class="legend"><span><span class="ld live"></span>Live Sensor</span><span><span class="ld" style="background:#22c55e"></span>Optimal</span><span><span class="ld" style="background:#f97316"></span>Monitor</span><span><span class="ld" style="background:#ef4444"></span>Critical</span><span style="color:#94a3b8;margin-left:auto">Demo panels @ 55% opacity</span></div><div class="notice"><div class="notice-i">ℹ</div><div><strong>Hybrid Demo Mode:</strong> Panel <strong style="color:#16a34a">A-001</strong> shows real-time data from the connected ESP32 sensor. The remaining 124 panels are simulated to demonstrate the system's scalability across a full solar farm deployment.</div></div></div>
 <div class="card card-full"><div class="card-title"><div class="title-l"><div class="title-bar"></div>Panel Status Table</div><span style="display:flex;gap:10px;align-items:center"><span style="font-size:9.5px;color:#94a3b8">Top results · Live row highlighted</span><a href="/api/report.pdf" target="_blank" rel="noopener" style="font-size:10px;background:#0f172a;color:#fff;padding:5px 12px;border-radius:6px;text-decoration:none;font-weight:600">⬇ Export PDF</a></span></div><table><thead><tr><th>Panel ID</th><th>T_min °C</th><th>T_max °C</th><th>ΔT °C</th><th>Humidity %</th><th>Status</th><th>Source</th><th>Recommendation</th></tr></thead><tbody id="tbody"></tbody></table></div>
 </div>
-<div class="tcam"><div class="tcam-img" id="thermalImgWrap"><img id="thermalStream" alt="TC001 Live Thermal Stream" style="display:none"><span id="thermalPlaceholder" style="position:relative;z-index:1">📷</span></div><div><div class="tcam-h">TC001 Thermal Camera <span class="tcam-status" id="thermalStatus"><span id="thermalStatusDot" style="width:6px;height:6px;border-radius:50%;background:#fb923c"></span><span id="thermalStatusText">Pending Hardware</span></span></div><div class="tcam-p" id="thermalText">High-resolution thermal imaging will stream here once the TC001 camera is connected via Raspberry Pi. Live video, hotspot detection overlays, and recording controls will replace this placeholder.</div><div class="tcam-list"><span class="tcam-tag">256×192 Resolution</span><span class="tcam-tag">-20°C → 550°C Range</span><span class="tcam-tag">25Hz Refresh</span><span class="tcam-tag">USB-C → Raspberry Pi</span></div></div></div>
+<div class="tcam"><div class="tcam-img" id="thermalImgWrap"><img id="thermalStream" alt="TC001 Live Thermal Stream" style="display:none"><span id="thermalPlaceholder" style="position:relative;z-index:1">📷</span></div><div><div class="tcam-h">TC001 Thermal Camera <span class="tcam-status" id="thermalStatus"><span id="thermalStatusDot" style="width:6px;height:6px;border-radius:50%;background:#fb923c"></span><span id="thermalStatusText">Pending STREAM_URL</span></span></div><div class="tcam-p" id="thermalText">High-resolution thermal imaging will stream here once the TC001 camera is connected via Raspberry Pi. Live video, hotspot detection overlays, and recording controls will replace this placeholder.</div><div class="tcam-list"><span class="tcam-tag">256×192 Resolution</span><span class="tcam-tag">-20°C → 550°C Range</span><span class="tcam-tag">25Hz Refresh</span><span class="tcam-tag">USB-C → Raspberry Pi</span></div></div></div>
 <div class="footer"><div class="fd"></div><div class="ft">Connected · Updates every 3s · Railway Cloud · ESP32 WiFi</div><div class="fr">Telegram alerts active · PDF reports ready</div></div>
 <div class="toast" id="toast">Saved</div>
 <script>
@@ -228,15 +228,17 @@ const thermalStatusDot = document.getElementById('thermalStatusDot');
 const thermalStatusText = document.getElementById('thermalStatusText');
 const thermalText = document.getElementById('thermalText');
 if (STREAM_URL) {
-  thermalImg.onload = () => {
-    thermalImg.style.display = 'block';
-    thermalPlaceholder.style.display = 'none';
-    thermalStatus.classList.remove('offline');
-    thermalStatus.classList.add('live');
-    thermalStatusDot.style.background = '#22c55e';
-    thermalStatusText.textContent = 'Live Stream';
-    thermalText.textContent = 'Live TC001 thermal stream is connected through Raspberry Pi and secure tunnel.';
-  };
+  // MJPEG streams may not fire onload reliably in Chrome — flip status to
+  // Live Stream optimistically as soon as we kick off the request.
+  thermalImg.src = STREAM_URL;
+  thermalImg.style.display = 'block';
+  thermalPlaceholder.style.display = 'none';
+  thermalStatus.classList.remove('offline');
+  thermalStatus.classList.add('live');
+  thermalStatusDot.style.background = '#22c55e';
+  thermalStatusText.textContent = 'Live Stream';
+  thermalText.textContent = 'Live TC001 thermal stream is connected through Raspberry Pi and secure tunnel.';
+  // onerror is the safety net — only flips to Offline if the URL is unreachable.
   thermalImg.onerror = () => {
     thermalImg.style.display = 'none';
     thermalPlaceholder.style.display = 'inline-block';
@@ -247,7 +249,6 @@ if (STREAM_URL) {
     thermalStatusText.textContent = 'Stream Offline';
     thermalText.textContent = 'Thermal stream URL is configured, but the camera stream is currently unreachable.';
   };
-  thermalImg.src = STREAM_URL;
 } else {
   thermalStatusText.textContent = 'Pending STREAM_URL';
 }
