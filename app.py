@@ -44,7 +44,7 @@ def send_telegram_alert(temp_object, temp_air, humidity, pressure):
     msg = (
         "⚠️ *Solar Panel Alert*\n\n"
         f"🔥 Surface Temp: *{temp_object:.2f} °C*\n"
-        f"🌡️ Air Temp: {temp_air:.2f} °C\n"
+        f"🌡️ Ambient Temp: {temp_air:.2f} °C\n"
         f"💧 Humidity: {humidity:.1f} %\n"
         f"🔵 Pressure: {pressure:.2f} hPa\n"
         f"🕐 Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
@@ -82,13 +82,13 @@ HTML = """<!DOCTYPE html>
 <div class="nav"><div style="display:flex;align-items:center;gap:8px"><div style="width:32px;height:32px;background:linear-gradient(135deg,#2563eb,#0ea5e9);border-radius:8px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 9l4-4 5 3 5-3 4 4-3 5 3 5-4 4-5-3-5 3-4-4 3-5z" stroke="#fff" stroke-width="1.8" fill="none"/><circle cx="12" cy="14" r="2.5" fill="#fff"/></svg></div><div><div class="nav-title">Drone IoT · Solar Monitor</div><div style="font-size:10px;color:#94a3b8">Advanced Thermal Detection System</div></div></div><div class="live"><div class="dot"></div>Live Feed Active</div><div style="font-size:11px;color:#94a3b8" id="clock">--:--:--</div></div>
 <div class="hero">
 <canvas id="cv"></canvas>
-<div class="hud-l"><div class="hcard"><div class="hc-lbl">Air Temperature</div><div class="hc-val c1" id="h1">--</div><div class="hc-unit">°C</div><div class="hbar"><div class="hbf f1" id="hb1" style="width:0%"></div></div></div></div>
+<div class="hud-l"><div class="hcard"><div class="hc-lbl">Ambient Temperature</div><div class="hc-val c1" id="h1">--</div><div class="hc-unit">°C</div><div class="hbar"><div class="hbf f1" id="hb1" style="width:0%"></div></div></div></div>
 <div class="hud-r"><div class="hcard" style="text-align:right"><div class="hc-lbl">Surface Temp</div><div class="hc-val c4" id="h3">--</div><div class="hc-unit">°C</div><div class="hbar"><div class="hbf f4" id="hb3" style="width:0%"></div></div></div><div class="hcard" style="text-align:right"><div class="hc-lbl">Pressure</div><div class="hc-val c3" id="h4">--</div><div class="hc-unit">hPa</div><div class="hbar"><div class="hbf f3" id="hb4" style="width:80%"></div></div></div></div>
 <div class="hero-text"><div class="hero-badge"><div class="dot"></div>Live Drone Surveillance</div><div class="hero-h1">Drone + IoT<br><span class="accent">Solar Panel Monitoring</span></div><div class="hero-p">Advanced thermal monitoring with live hotspot detection. Real-time drone surveillance combined with IoT sensors.</div><div class="btns"><a class="btn-a" href="#dashboard">↓ View Live Dashboard</a><a class="btn-b" href="/api/report.pdf" target="_blank" rel="noopener">⚡ Thermal Reports</a></div></div>
 </div>
 <div class="stats"><div class="stat"><div class="si si1">⚡</div><div><div class="st-lbl">Total Panels</div><div class="st-val" style="color:#2563eb">125</div><div class="st-sub"><span style="color:#16a34a;font-weight:700">1 Live</span> · <span style="color:#94a3b8">124 Demo</span></div></div></div><div class="stat"><div class="si si2">⚠️</div><div><div class="st-lbl">Critical Alerts</div><div class="st-val" style="color:#dc2626" id="nalerts">--</div><div class="st-sub">Need inspection</div></div></div></div>
 <div class="grid" id="dashboard">
-<div class="card"><div class="card-title"><div class="title-l"><div class="title-bar"></div>Live Sensor Readings</div><span class="live-chip"><span class="dot"></span>ESP32 LIVE</span></div><div class="sen-grid"><div class="sc sc1"><div class="sc-lbl">🌡️ Air Temp</div><div class="sc-val" style="color:#2563eb" id="s1">--</div><div class="sc-unit">°C</div><div class="sc-bar"><div class="sc-fill f1" id="sb1" style="width:0%"></div></div></div><div class="sc sc3"><div class="sc-lbl">🔵 Pressure</div><div class="sc-val" style="color:#d97706" id="s3">--</div><div class="sc-unit">hPa</div><div class="sc-bar"><div class="sc-fill f3" style="width:80%"></div></div></div><div class="sc sc4"><div class="sc-lbl">🔥 Surface Temp</div><div class="sc-val" style="color:#dc2626" id="s4">--</div><div class="sc-unit">°C</div><div class="sc-bar"><div class="sc-fill f4" id="sb4" style="width:0%"></div></div></div></div></div>
+<div class="card"><div class="card-title"><div class="title-l"><div class="title-bar"></div>Live Sensor Readings</div><span class="live-chip"><span class="dot"></span>ESP32 LIVE</span></div><div class="sen-grid"><div class="sc sc1"><div class="sc-lbl">🌡️ Ambient Temp</div><div class="sc-val" style="color:#2563eb" id="s1">--</div><div class="sc-unit">°C</div><div class="sc-bar"><div class="sc-fill f1" id="sb1" style="width:0%"></div></div></div><div class="sc sc3"><div class="sc-lbl">🔵 Pressure</div><div class="sc-val" style="color:#d97706" id="s3">--</div><div class="sc-unit">hPa</div><div class="sc-bar"><div class="sc-fill f3" style="width:80%"></div></div></div><div class="sc sc4"><div class="sc-lbl">🔥 Surface Temp</div><div class="sc-val" style="color:#dc2626" id="s4">--</div><div class="sc-unit">°C</div><div class="sc-bar"><div class="sc-fill f4" id="sb4" style="width:0%"></div></div></div></div></div>
 <div class="card"><div class="card-title"><div class="title-l"><div class="title-bar"></div>Interactive Panel Map</div><span style="font-size:9.5px;color:#94a3b8">A-001 = <span style="color:#16a34a;font-weight:700">LIVE</span></span></div><div class="pmap" id="pmap"></div><div class="legend"><span><span class="ld live"></span>Live Sensor</span><span><span class="ld" style="background:#22c55e"></span>Optimal</span><span><span class="ld" style="background:#f97316"></span>Monitor</span><span><span class="ld" style="background:#ef4444"></span>Critical</span><span style="color:#94a3b8;margin-left:auto">Demo panels @ 55% opacity</span></div><div class="notice"><div class="notice-i">ℹ</div><div><strong>Hybrid Demo Mode:</strong> Panel <strong style="color:#16a34a">A-001</strong> shows real-time data from the connected ESP32 sensor. The remaining 124 panels are simulated to demonstrate the system's scalability across a full solar farm deployment.</div></div></div>
 <div class="card card-full"><div class="card-title"><div class="title-l"><div class="title-bar"></div>Panel Status Table</div><span style="display:flex;gap:10px;align-items:center"><span style="font-size:9.5px;color:#94a3b8">Top results · Live row highlighted</span><a href="/api/report.pdf" target="_blank" rel="noopener" style="font-size:10px;background:#0f172a;color:#fff;padding:5px 12px;border-radius:6px;text-decoration:none;font-weight:600">⬇ Export PDF</a></span></div><table><thead><tr><th>Panel ID</th><th>T_min °C</th><th>T_max °C</th><th>ΔT °C</th><th>Status</th><th>Source</th><th>Recommendation</th></tr></thead><tbody id="tbody"></tbody></table></div>
 </div>
@@ -368,7 +368,7 @@ def report_pdf():
     story.append(Paragraph("Live Sensor Snapshot (Panel A-001)", section_style))
     sensor_data = [
         ["Metric", "Value", "Unit"],
-        ["Air Temperature",  f"{latest_data.get('temp_bme', 0):.2f}",     "°C"],
+        ["Ambient Temperature",  f"{latest_data.get('temp_bme', 0):.2f}",     "°C"],
         ["Surface Temperature", f"{latest_data.get('temp_object', 0):.2f}",  "°C"],
         ["Ambient Temperature", f"{latest_data.get('temp_ambient', 0):.2f}", "°C"],
         ["Humidity",         f"{latest_data.get('humidity', 0):.1f}",     "%"],
@@ -408,7 +408,7 @@ def report_pdf():
     story.append(Spacer(1, 14))
     story.append(Paragraph("Diagnostic Assessment", section_style))
     story.append(Paragraph(
-        f"ΔT (Surface − Air): <b>{dt:.2f} °C</b><br/>"
+        f"ΔT (Surface − Ambient): <b>{dt:.2f} °C</b><br/>"
         f"Status: <font color='{status_color}'><b>{status_text}</b></font><br/>"
         f"Recommendation: {recommendation}",
         body_style
