@@ -227,18 +227,33 @@ const thermalStatusDot = document.getElementById('thermalStatusDot');
 const thermalStatusText = document.getElementById('thermalStatusText');
 const thermalText = document.getElementById('thermalText');
 if (STREAM_URL) {
-  // MJPEG streams may not fire onload reliably in Chrome — flip status to
-  // Live Stream optimistically as soon as we kick off the request.
-  thermalImg.src = STREAM_URL;
-  thermalImg.style.display = 'block';
-  thermalPlaceholder.style.display = 'none';
-  thermalStatus.classList.remove('offline');
-  thermalStatus.classList.add('live');
-  thermalStatusDot.style.background = '#22c55e';
-  thermalStatusText.textContent = 'Live Stream';
-  thermalText.textContent = 'Live TC001 thermal stream is connected through Raspberry Pi and secure tunnel.';
-  // onerror is the safety net — only flips to Offline if the URL is unreachable.
-  thermalImg.onerror = () => {
+  // MJPEG over Cloudflare can briefly disconnect, buffer, or fire an error event
+  // even while the direct /video link is reachable. Keep the visual state stable
+  // and retry with a cache-buster instead of instantly hiding the stream.
+  let thermalRetryTimer = null;
+  let thermalErrorCount = 0;
+
+  function setThermalLive() {
+    thermalImg.style.display = 'block';
+    thermalPlaceholder.style.display = 'none';
+    thermalStatus.classList.remove('offline');
+    thermalStatus.classList.add('live');
+    thermalStatusDot.style.background = '#22c55e';
+    thermalStatusText.textContent = 'Live Stream';
+    thermalText.textContent = 'Live TC001 thermal stream is connected through Raspberry Pi and secure tunnel.';
+  }
+
+  function setThermalReconnecting() {
+    thermalImg.style.display = 'block';
+    thermalPlaceholder.style.display = 'none';
+    thermalStatus.classList.remove('offline');
+    thermalStatus.classList.add('live');
+    thermalStatusDot.style.background = '#fbbf24';
+    thermalStatusText.textContent = 'Reconnecting...';
+    thermalText.textContent = 'Thermal stream is reconnecting. Keep Raspberry Pi camera and Cloudflare tunnel running.';
+  }
+
+  function setThermalOffline() {
     thermalImg.style.display = 'none';
     thermalPlaceholder.style.display = 'inline-block';
     thermalPlaceholder.textContent = '⚠️';
@@ -247,6 +262,35 @@ if (STREAM_URL) {
     thermalStatusDot.style.background = '#ef4444';
     thermalStatusText.textContent = 'Stream Offline';
     thermalText.textContent = 'Thermal stream URL is configured, but the camera stream is currently unreachable.';
+  }
+
+  function streamUrlWithCacheBust() {
+    const sep = STREAM_URL.includes('?') ? '&' : '?';
+    return STREAM_URL + sep + 't=' + Date.now();
+  }
+
+  setThermalLive();
+  thermalImg.src = streamUrlWithCacheBust();
+
+  thermalImg.onload = () => {
+    thermalErrorCount = 0;
+    setThermalLive();
+  };
+
+  thermalImg.onerror = () => {
+    thermalErrorCount += 1;
+
+    if (thermalErrorCount < 5) {
+      setThermalReconnecting();
+    } else {
+      setThermalOffline();
+    }
+
+    if (thermalRetryTimer) return;
+    thermalRetryTimer = setTimeout(() => {
+      thermalRetryTimer = null;
+      thermalImg.src = streamUrlWithCacheBust();
+    }, 2500);
   };
 } else {
   thermalStatusText.textContent = 'Pending STREAM_URL';
