@@ -31,7 +31,7 @@ ALERT_COOLDOWN_SEC   = 300        # 5 minutes between alerts
 _last_alert_ts = 0.0
 _alert_lock = threading.Lock()
 def send_telegram_alert(temp_object, temp_air, humidity, pressure):
-    """Send a Telegram message when surface heat exceeds threshold."""
+    """Send a Telegram message when surface temp exceeds threshold."""
     global _last_alert_ts
     if not TELEGRAM_BOT_TOKEN or TELEGRAM_BOT_TOKEN.startswith("REPLACE"):
         print("[Telegram] Token not configured; skipping alert.")
@@ -305,7 +305,7 @@ def receive():
     latest_data = d
     latest_data['timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print(f"Data: {latest_data}")
-    # Trigger Telegram alert if surface heat exceeds threshold
+    # Trigger Telegram alert if surface temp exceeds threshold
     try:
         temp_obj = float(latest_data.get("temp_object", 0))
         if temp_obj > ALERT_TEMP_THRESHOLD:
@@ -370,8 +370,6 @@ def report_pdf():
         ["Metric", "Value", "Unit"],
         ["Ambient Temperature",  f"{latest_data.get('temp_bme', 0):.2f}",     "°C"],
         ["Surface Temperature", f"{latest_data.get('temp_object', 0):.2f}",  "°C"],
-        ["Ambient Temperature", f"{latest_data.get('temp_ambient', 0):.2f}", "°C"],
-        ["Humidity",         f"{latest_data.get('humidity', 0):.1f}",     "%"],
         ["Pressure",         f"{latest_data.get('pressure', 0):.2f}",     "hPa"],
         ["Last Update",      str(latest_data.get('timestamp', '-')),      "-"],
     ]
@@ -408,7 +406,6 @@ def report_pdf():
     story.append(Spacer(1, 14))
     story.append(Paragraph("Diagnostic Assessment", section_style))
     story.append(Paragraph(
-        f"ΔT (Surface − Ambient): <b>{dt:.2f} °C</b><br/>"
         f"Status: <font color='{status_color}'><b>{status_text}</b></font><br/>"
         f"Recommendation: {recommendation}",
         body_style
@@ -418,7 +415,7 @@ def report_pdf():
     story.append(Paragraph(
         "• This report reflects the most recent reading from the live sensor (Panel A-001).<br/>"
         "• The dashboard simulates an additional 124 panels to demonstrate scalability.<br/>"
-        "• Telegram alerts trigger automatically when surface heat exceeds "
+        "• Telegram alerts trigger automatically when surface temp exceeds "
         f"{ALERT_TEMP_THRESHOLD:.0f} °C.<br/>"
         "• TC001 thermal camera integration is pending Raspberry Pi connectivity.",
         body_style
